@@ -16,7 +16,7 @@
         </b-container>
 
         <!-- Menampilkan modal ItemDetail dengan data item -->
-        <ItemDetail :item="selectedItem" :show="modalVisible" @update:show="modalVisible = $event" />
+        <ItemDetail :item="selectedItem" :show="modalVisible" @update:show="modalVisible = $event" :mode="'add'" />
     </div>
 </template>
 

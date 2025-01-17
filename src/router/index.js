@@ -1,15 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/Home.vue';
 import Chart from '../views/Chart.vue';
-import Login from '../views/Login.vue'; // Halaman login
+import Login from '../views/Login.vue';
 import Profile from '../views/Profile.vue';
+import Transaction from '../views/Transaction.vue';
 import { useAuthStore } from '../store/auth';
 
 const routes = [
   { path: '/', name: 'Home', component: Home, meta: { requiresAuth: false } },
   { path: '/chart', name: 'Chart', component: Chart, meta: { requiresAuth: true } },
   { path: '/login', name: 'Login', component: Login, meta: { requiresAuth: false } },
-  { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } }, // Add Profile route
+  { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
+  { path: '/transaction', name: 'Transaction', component: Transaction, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({

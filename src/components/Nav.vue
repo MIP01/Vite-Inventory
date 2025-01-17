@@ -51,7 +51,7 @@ export default {
             tabs: [
                 { label: "Items", route: '/', content: "Daftar items akan ditampilkan di sini." },
                 { label: "Chart", route: '/chart', content: "Halaman About." },
-                { label: "History", route: '/history', content: "Halaman Contact." },
+                { label: "Transaction", route: '/transaction', content: "Halaman Contact." },
                 { label: "Profile", route: '/profile', content: "Halaman Profile." },
             ],
         };

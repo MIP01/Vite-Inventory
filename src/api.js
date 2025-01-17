@@ -98,3 +98,72 @@ export const getItemById = async (id) => {
     throw error;
   }
 };
+
+export const getChart = async () => {
+  const authStore = useAuthStore(); // Ambil store auth untuk mendapatkan token
+
+  // Ambil token dari localStorage atau store auth
+  const token = localStorage.getItem('token') || authStore?.user?.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.get(`/chart`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+      },
+    });
+    return response.data.transaction;
+  } catch (error) {
+    console.error('Error fetching chart:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const addChart = async (data) => {
+  const authStore = useAuthStore(); // Ambil store auth untuk mendapatkan token
+
+  // Ambil token dari localStorage atau store auth
+  const token = localStorage.getItem('token') || authStore?.user?.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.post(`/chart`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding item to chart:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const updateChartById = async (transactionId, data) => {
+  const authStore = useAuthStore(); // Ambil store auth untuk mendapatkan token
+
+  // Ambil token dari localStorage atau store auth
+  const token = localStorage.getItem('token') || authStore?.user?.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.put(`/chart/${transactionId}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+      },
+    });
+    return response.data.transaction;
+  } catch (error) {
+    console.error('Error updateing chart item:', error.response?.data || error.message);
+    throw error;
+  }
+};
