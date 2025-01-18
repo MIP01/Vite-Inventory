@@ -18,6 +18,7 @@
 
 <script>
 import { useAuthStore } from '../store/auth';
+import { useAlertStore } from '../store/alert';
 import { getUserById } from '../api';
 
 export default {
@@ -49,11 +50,14 @@ export default {
                 const response = await getUserById(authStore.user.user_id);
                 this.user = response; // Simpan data user yang diterima dari API
             } catch (error) {
+                const alertStore = useAlertStore();
                 // Penanganan error, termasuk redirect jika token kedaluwarsa
                 if (error.response?.data?.error === 'Token is expired') {
                     this.errorMessage = 'Your session has expired. Redirecting to login...';
+                    alertStore.showAlert(this.errorMessage, true);
                 } else {
                     this.errorMessage = 'Failed to load user details. Please try again later.';
+                    alertStore.showAlert(this.errorMessage, true);
                 }
                 console.error(error);
             } finally {
@@ -62,7 +66,9 @@ export default {
         },
         signOut() {
             const authStore = useAuthStore();
+            const alertStore = useAlertStore();
             authStore.signOut(); // Clear authentication state
+            alertStore.showAlert('You have been logged out successfully', false);
             this.$router.push('/login'); // Redirect to login
         },
     },

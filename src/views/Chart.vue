@@ -16,7 +16,7 @@
                         <b-button size="sm" variant="primary" @click="openModal(data.item.transaction_id)">
                             <i class="mdi mdi-pencil"></i>
                         </b-button>
-                        <b-button size="sm" variant="danger" @click="deleteItem(data.item)">
+                        <b-button size="sm" variant="danger" @click="deleteItem(data.item.transaction_id)">
                             <i class="mdi mdi-trash-can"></i>
                         </b-button>
                     </div>
@@ -31,8 +31,9 @@
 
 <script>
 import { ref, onMounted } from 'vue';
-import { getChart } from '../api';
+import { getChart, deleteChart } from '../api';
 import ItemDetail from '../components/ItemDetail.vue';
+import { useAlertStore } from '../store/alert';
 
 export default {
     name: 'Chart',
@@ -40,6 +41,7 @@ export default {
         ItemDetail,
     },
     setup() {
+        const alertStore = useAlertStore();
         const chartData = ref([]);
         const modalVisible = ref(false);
         const selectedItem = ref({});
@@ -54,16 +56,41 @@ export default {
         const fetchChart = async () => {
             try {
                 const data = await getChart();
-                chartData.value = data;
+                chartData.value = [...data];
                 console.log('Chart data fetched:', data);
             } catch (error) {
                 console.error('Error fetching chart:', error);
             }
         };
 
-        const deleteItem = (item) => {
-            console.log('Delete item:', item);
-            // Add logic for deleting item here
+        const deleteItem = async (transactionId) => {
+            console.log('Delete button clicked for transaction ID:', transactionId); // Debugging
+
+            alertStore.showConfirmation('Are you sure you want to delete this item?', async () => {
+                console.log('Confirmation received for transaction ID:', transactionId); // Debugging
+
+                try {
+                    const response = await deleteChart(transactionId);
+                    console.log('Delete response:', response); // Log response structure for debugging
+
+                    // Check if response is valid and contains success
+                    if (response && response.message) {
+                        alertStore.showAlert(response.message || 'Transaction deleted successfully', false);
+
+                        await fetchChart();  // Fetch fresh data from the server
+                        console.log('Chart data fetched after delete:', chartData.value); // Debugging
+
+                    } else {
+                        alertStore.showAlert(response?.message || 'An unexpected error occurred', true);
+                    }
+                } catch (error) {
+                    console.error('Error deleting item:', error); // Debugging error
+                    alertStore.showAlert(
+                        error.response?.data?.error || 'An unexpected error occurred',
+                        true
+                    );
+                }
+            });
         };
 
         const openModal = (transactionId) => {
@@ -82,7 +109,9 @@ export default {
             }
         };
 
-        onMounted(fetchChart);
+        onMounted(() => {
+            fetchChart();
+        });
 
         return {
             chartData,

@@ -34,6 +34,8 @@ import { ref, watch } from 'vue';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { addChart, updateChartById } from '../api';
+import { useAlertStore } from '../store/alert';
+
 
 export default {
     name: 'ItemDetail',
@@ -52,6 +54,7 @@ export default {
         },
     },
     setup(props, { emit }) {
+        const alertStore = useAlertStore();
         const modalItem = ref(props.item);
         const showModal = ref(props.show);
         const quantity = ref(0);
@@ -106,14 +109,17 @@ export default {
                 if (props.mode === 'add') {
                     await addChart(data);
                     emit('add-to-chart', data);
+                    alertStore.showAlert(data.message || 'Chart created successfully', false);
                 } else {
-                    await updateChartById(modalItem.value.transaction_id, data);
+                    const response = await updateChartById(modalItem.value.transaction_id, data);
                     emit('update-chart', data);
+                    alertStore.showAlert(response.message || 'Chart updated successfully', false);
                 }
                 showModal.value = false;
             } catch (error) {
                 console.error('Error:', error);
                 errorMessage.value = 'Failed to add to chart or update chart.';
+                alertStore.showAlert('Failed to process the action. Please try again.', true); // Tampilkan alert error
             } finally {
                 loading.value = false;
             }

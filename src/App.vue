@@ -1,20 +1,31 @@
-<script setup>
-import Nav from './components/Nav.vue';
-import { useAuthStore } from './store/auth';
-
-// Sinkronisasi token saat aplikasi dimuat
-const authStore = useAuthStore();
-authStore.loadToken();
-</script>
-
 <template>
   <div id="app">
-    <!-- Komponen Nav dengan slot berisi router-view -->
     <Nav>
       <router-view />
     </Nav>
+
+    <!-- Alert Modal -->
+    <AlertModal
+      v-model:show="alertStore.state.show"
+      :message="alertStore.state.message"
+      :isError="alertStore.state.isError"
+      :isConfirmation="alertStore.state.isConfirmation"
+      @update:show="alertStore.state.show = $event"
+      @confirm="alertStore.confirmAction"
+    />
   </div>
 </template>
+
+<script setup>
+import Nav from './components/Nav.vue';
+import AlertModal from './components/AlertModal.vue';
+import { useAuthStore } from './store/auth';
+import { useAlertStore } from './store/alert';
+
+const alertStore = useAlertStore();
+const authStore = useAuthStore();
+authStore.loadToken();
+</script>
 
 <style scoped>
 /* Tambahkan gaya tambahan jika diperlukan */

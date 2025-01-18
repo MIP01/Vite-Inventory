@@ -3,10 +3,10 @@
         <h1>Login</h1>
         <BForm @submit.prevent="handleLogin">
             <BFormFloatingLabel label="Email address" for="email" label-for="floatingEmail" class="my-2">
-                <BFormInput v-model="credentials.email" id="email" type="email" placeholder="Email address" class="text-dark"/>
+                <BFormInput v-model="credentials.email" id="email" type="email" placeholder="Email address" class="text-dark" />
             </BFormFloatingLabel>
             <BFormFloatingLabel label="Password" for="password" label-for="floatingPassword" class="my-2">
-                <BFormInput v-model="credentials.password" id="password" type="password" placeholder="Password" class="text-dark"/>
+                <BFormInput v-model="credentials.password" id="password" type="password" placeholder="Password" class="text-dark" />
             </BFormFloatingLabel>
             <b-button variant="primary" type="submit" :disabled="isLoading">Login</b-button>
         </BForm>
@@ -19,10 +19,12 @@ import { ref } from 'vue';
 import { login } from '../api'; // API untuk login
 import { useAuthStore } from '../store/auth'; // Pinia Store
 import { useRouter } from 'vue-router';
+import { useAlertStore } from '../store/alert';
 
 export default {
     name: 'Login',
     setup() {
+        const alertStore = useAlertStore();
         const credentials = ref({ email: '', password: '' });
         const isLoading = ref(false);
         const errorMessage = ref(null);
@@ -46,9 +48,10 @@ export default {
                 localStorage.removeItem('redirectRoute');
                 router.push(redirectRoute);
 
-                alert(response.message || 'Login successful!');
+                alertStore.showAlert(response.message || 'Login successful!', false);
             } catch (error) {
-                errorMessage.value = error.message || 'Login failed. Please try again.';
+                alertStore.showAlert(error.response?.data?.error || 'Login failed. Please try again.', true);
+                console.error(error);
             } finally {
                 isLoading.value = false;
             }
