@@ -1,5 +1,5 @@
 <template>
-    <div class="login-container">
+    <b-container class="login-container">
         <h1>Login</h1>
         <BForm @submit.prevent="handleLogin">
             <BFormFloatingLabel label="Email address" for="email" label-for="floatingEmail" class="my-2">
@@ -8,16 +8,22 @@
             <BFormFloatingLabel label="Password" for="password" label-for="floatingPassword" class="my-2">
                 <BFormInput v-model="credentials.password" id="password" type="password" placeholder="Password" class="text-dark" />
             </BFormFloatingLabel>
-            <b-button variant="primary" type="submit" :disabled="isLoading">Login</b-button>
+            <b-row class="mt-2">
+                <b-col cols="12" class="text-center">
+                    <b-link href="/signup" class="text-decoration-none">
+                        Create Account
+                    </b-link>
+                </b-col>
+            </b-row>
+            <b-button variant="primary" type="submit" :disabled="isLoading" class="mt-3 w-100">Login</b-button>
         </BForm>
-        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-    </div>
+    </b-container>
 </template>
 
 <script>
 import { ref } from 'vue';
-import { login } from '../api'; // API untuk login
-import { useAuthStore } from '../store/auth'; // Pinia Store
+import { login } from '../api';
+import { useAuthStore } from '../store/auth';
 import { useRouter } from 'vue-router';
 import { useAlertStore } from '../store/alert';
 
@@ -27,14 +33,12 @@ export default {
         const alertStore = useAlertStore();
         const credentials = ref({ email: '', password: '' });
         const isLoading = ref(false);
-        const errorMessage = ref(null);
 
         const authStore = useAuthStore(); // Mendapatkan Pinia store
         const router = useRouter();
 
         const handleLogin = async () => {
             isLoading.value = true;
-            errorMessage.value = null;
 
             try {
                 const response = await login(credentials.value); // Panggil API login
@@ -60,7 +64,6 @@ export default {
         return {
             credentials,
             isLoading,
-            errorMessage,
             handleLogin,
         };
     },

@@ -33,6 +33,21 @@ apiClient.interceptors.response.use(
 export default apiClient;
 
 // Fungsi akses endpoint API
+export const createUser = async (userData) => {
+  const alertStore = useAlertStore();
+
+  try {
+    const response = await apiClient.post(`/user`, userData);
+    console.log("User created:", response.data);
+    return response.data;
+  } catch (error) {
+     const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    console.error('Error create user:', error.response?.data || error.message);
+    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
+    throw error;
+  }
+};
+
 export const getUserById = async (id) => {
   const authStore = useAuthStore(); // Ambil store auth untuk mendapatkan token
 
@@ -58,6 +73,8 @@ export const getUserById = async (id) => {
 };
 
 export const login = async (credentials) => {
+  const alertStore = useAlertStore();
+
   try {
     const response = await apiClient.post('/login', credentials);
     const { token } = response.data;
@@ -68,8 +85,10 @@ export const login = async (credentials) => {
 
     return response.data;
   } catch (error) {
-    console.error('Error during login:', error.response?.data || error.message);
-    throw error.response?.data || error; // Lemparkan error untuk ditangani di komponen
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    console.error('Error add chart item:', error.response?.data || error.message);
+    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
+    throw error; // Tetap lempar error agar bisa ditangani lebih lanjut
   }
 };
 
@@ -143,7 +162,7 @@ export const addChart = async (data) => {
     return response.data;
   } catch (error) {
     const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
-    console.error('Error delete chart item:', error.response?.data || error.message);
+    console.error('Error add chart item:', error.response?.data || error.message);
     alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
     throw error; // Tetap lempar error agar bisa ditangani lebih lanjut
   }

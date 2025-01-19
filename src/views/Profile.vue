@@ -1,9 +1,8 @@
 <template>
-    <div class="profile-container">
+    <b-container class="profile-container">
         <h1>Profile</h1>
-        <div v-if="isLoading" class="loading">Loading...</div>
-        <div v-else-if="errorMessage" class="error">{{ errorMessage }}</div>
-        <div v-else class="profile-details">
+        <b-row v-if="isLoading" class="loading">Loading...</b-row>
+        <b-row v-else class="justify-content-center profile-details">
             <p><strong>Name:</strong> {{ user.name }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
             <p><strong>User ID:</strong> {{ user.user_id }}</p>
@@ -11,9 +10,11 @@
             <!-- Menampilkan role untuk admin -->
             <p v-if="authStore.user.role === 'admin'"><strong>Role:</strong> Admin</p>
 
-            <button @click="signOut" class="signout-button">Sign Out</button>
-        </div>
-    </div>
+            <b-button variant="danger" class="mt-3 w-100" @click="signOut">
+                Sign Out
+            </b-button>
+        </b-row>
+    </b-container>
 </template>
 
 <script>
@@ -27,7 +28,6 @@ export default {
         return {
             user: null,
             isLoading: true,
-            errorMessage: null,
         };
     },
     methods: {

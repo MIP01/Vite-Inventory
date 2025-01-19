@@ -18,9 +18,6 @@
                 :disabled="quantity >= modalItem.stock">+</b-button>
         </div>
 
-        <!-- Tampilkan pesan error -->
-        <p v-if="errorMessage" class="text-danger mt-3">{{ errorMessage }}</p>
-
         <!-- Footer kustom -->
         <template #footer>
             <b-button variant="secondary" @click="closeModal">Cancel</b-button>
@@ -59,7 +56,6 @@ export default {
         const showModal = ref(props.show);
         const quantity = ref(0);
         const loading = ref(false); // Tambahkan state loading untuk menghindari klik ganda
-        const errorMessage = ref('');
 
         watch(() => props.item, (newItem) => {
             console.log('New item received in ItemDetail:', newItem); // Debug
@@ -102,7 +98,6 @@ export default {
 
         const handleAction = async () => {
             loading.value = true;
-            errorMessage.value = '';
 
             const data = { item_id: modalItem.value.item_id, quantity: quantity.value };
             try {
@@ -118,8 +113,10 @@ export default {
                 showModal.value = false;
             } catch (error) {
                 console.error('Error:', error);
-                errorMessage.value = 'Failed to add to chart or update chart.';
-                alertStore.showAlert('Failed to process the action. Please try again.', true); // Tampilkan alert error
+                alertStore.showAlert(
+                    error.response?.data?.error || error.message ||'An unexpected error occurred',
+                    true
+                );
             } finally {
                 loading.value = false;
             }
@@ -141,7 +138,6 @@ export default {
             decrementQuantity,
             closeModal,
             loading,
-            errorMessage,
             actionLabel,
             handleAction,
         };
