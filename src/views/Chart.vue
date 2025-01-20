@@ -5,9 +5,14 @@
                 <span class="icon"><i class="mdi mdi-account-multiple"></i></span>
                 Item List
             </p>
-            <b-button class="card-header-icon" @click="fetchChart" variant="primary">
-                <span class="icon"><i class="mdi mdi-reload"></i></span>
-            </b-button>
+            <div class="buttons" style="display: flex;">
+                <b-button class="card-header-icon" @click="fetchChart" variant="primary">
+                    <span class="icon"><i class="mdi mdi-reload"></i></span>
+                </b-button>
+                <b-button @click="openLoanModal" variant="success" class="ml-3">
+                    <i class="mdi mdi-plus"></i> Loan Item
+                </b-button>
+            </div>
         </header>
         <div class="card-content">
             <b-table :items="chartData" :fields="fields" bordered hover striped responsive class="is-fullwidth">
@@ -23,9 +28,13 @@
                 </template>
             </b-table>
         </div>
-        <!-- Menampilkan modal ItemDetail dengan data item -->
+        <!-- Menampilkan modal dengan data item -->
         <ItemDetail :item="selectedItem" :show="modalVisible" @update:show="modalVisible = $event"
             @update-chart="fetchChart" :mode="'update'" />
+
+        <TransactionModal :items="chartData" :show="loanModalVisible" @update:show="loanModalVisible = $event" 
+            @update-chart="fetchChart"/>
+
     </div>
 </template>
 
@@ -34,16 +43,19 @@ import { ref, onMounted } from 'vue';
 import { getChart, deleteChart } from '../api';
 import ItemDetail from '../components/ItemDetail.vue';
 import { useAlertStore } from '../store/alert';
+import TransactionModal from "../components/TransactionModal.vue";
 
 export default {
     name: 'Chart',
     components: {
         ItemDetail,
+        TransactionModal,
     },
     setup() {
         const alertStore = useAlertStore();
         const chartData = ref([]);
         const modalVisible = ref(false);
+        const loanModalVisible = ref(false);
         const selectedItem = ref({});
         const fields = [
             { key: 'user', label: 'User', sortable: true },
@@ -109,6 +121,10 @@ export default {
             }
         };
 
+        const openLoanModal = () => {
+            loanModalVisible.value = true;
+        };
+
         onMounted(() => {
             fetchChart();
         });
@@ -121,6 +137,8 @@ export default {
             openModal,
             selectedItem,
             modalVisible,
+            loanModalVisible,
+            openLoanModal,
         };
     },
 };
@@ -129,20 +147,15 @@ export default {
 <style scoped>
 .card-header {
     display: flex;
-    /* Mengaktifkan Flexbox */
     align-items: center;
-    /* Memastikan semua item sejajar secara vertikal */
     justify-content: space-between;
-    /* Memberikan jarak antara title dan tombol */
+    gap: 8px;
 }
 
 .card-header-title {
     display: flex;
-    /* Jika ada ikon di dalam title */
     align-items: center;
-    /* Pastikan teks dan ikon sejajar */
     font-size: 27px;
-    /* Besarkan ukuran font */
     font-weight: bold;
     gap: 8px;
 }
@@ -150,24 +163,26 @@ export default {
 .card-header-icon {
     cursor: pointer;
     display: flex;
-    /* Memastikan ikon di tengah */
     align-items: center;
     justify-content: center;
     width: 36px;
-    /* Lebar tetap */
     height: 36px;
-    /* Tinggi sama dengan lebar */
     padding: 0;
-    /* Pastikan padding tidak memengaruhi ukuran */
     box-sizing: border-box;
+}
+
+.card-header-icon,
+.ml-3 {
+    margin-left: 8px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .actions-cell {
     display: flex;
-    /* Menyusun elemen dalam satu baris */
     gap: 8px;
-    /* Jarak antar elemen */
     align-items: center;
-    /* Selaraskan tombol secara vertikal */
 }
 </style>
