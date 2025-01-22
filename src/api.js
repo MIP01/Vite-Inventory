@@ -221,6 +221,7 @@ export const deleteChart = async (transactionId) => {
 
 export const getDetail = async () => {
   const authStore = useAuthStore();
+  const alertStore = useAlertStore();
 
   // Ambil token dari localStorage atau store auth
   const token = localStorage.getItem('token') || authStore?.user?.token;
@@ -237,7 +238,61 @@ export const getDetail = async () => {
     });
     return response.data.detail;
   } catch (error) {
-    console.error('Error fetching detail:', error.response?.data || error.message);
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    console.error('Error add detail:', error.response?.data || error.message);
+    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
+    throw error;
+  }
+};
+
+export const deleteDetail = async (detailId) => {
+  const authStore = useAuthStore();
+  const alertStore = useAlertStore();
+  
+  // Ambil token dari localStorage atau store auth
+  const token = localStorage.getItem('token') || authStore?.user?.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.delete(`/detail/${detailId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+      },
+    });
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    console.error('Error delete detail:', error.response?.data || error.message);
+    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
+    throw error;
+  }
+};
+
+export const updateDetail = async (detailId, data) => {
+  const authStore = useAuthStore();
+  const alertStore = useAlertStore();
+
+  // Ambil token dari localStorage atau store auth
+  const token = localStorage.getItem('token') || authStore?.user?.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.put(`/detail/${detailId}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+      },
+    });
+    return response.data.detail;
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    console.error('Error update chart item:', error.response?.data || error.message);
+    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
     throw error;
   }
 };

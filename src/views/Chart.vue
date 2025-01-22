@@ -32,8 +32,8 @@
         <ItemDetail :item="selectedItem" :show="modalVisible" @update:show="modalVisible = $event"
             @update-chart="fetchChart" :mode="'update'" />
 
-        <TransactionModal :items="chartData" :show="loanModalVisible" @update:show="loanModalVisible = $event" 
-            @update-chart="fetchChart"/>
+        <TransactionModal :items="chartData" :show="loanModalVisible" :mode="'add'"
+            @update:show="loanModalVisible = $event" @add-transaction="fetchChart" />
 
     </div>
 </template>
@@ -122,8 +122,11 @@ export default {
         };
 
         const openLoanModal = () => {
+            console.log('Loan Modal Visible Before:', loanModalVisible.value);
             loanModalVisible.value = true;
+            console.log('Loan Modal Visible After:', loanModalVisible.value);
         };
+
 
         onMounted(() => {
             fetchChart();

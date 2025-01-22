@@ -1,6 +1,5 @@
 <template>
-  <b-modal id="transaction-modal" title="Loan Items" :visible="isVisible" @hide="closeModal" ok-title="Submit Loan"
-    cancel-title="Cancel" size="lg" @ok="onSubmit">
+  <b-modal v-model="isVisible" title="Loan Items">
     <div>
       <h5>Items to Loan</h5>
       <b-table :items="draftItems" :fields="fields" small bordered responsive>
@@ -38,13 +37,20 @@
         </b-col>
       </b-row>
     </b-form>
+    <!-- Footer kustom -->
+    <template #footer>
+      <b-button variant="secondary" @click="closeModal">Cancel</b-button>
+      <b-button variant="primary" @click="handleAction">{{ actionLabel }}</b-button>
+    </template>
   </b-modal>
 </template>
 
 <script>
-import { ref, computed } from "vue";
-import { addDetail } from "../api";
+import { ref, computed, watch } from "vue";
+import { addDetail,updateDetail } from "../api";
 import { useAlertStore } from '../store/alert';
+import { format } from 'date-fns';
+import { id } from 'date-fns/locale';
 
 export default {
   name: "TransactionModal",
@@ -57,17 +63,47 @@ export default {
       type: Array,
       required: true,
     },
+    selectedItem: {
+      type: Object,
+      required: false,  // This will be passed from the parent component
+    },
+    mode: {
+      type: String,
+      default: 'add',
+    },
   },
   emits: ["update:show", "update-chart"],
   setup(props, { emit }) {
     const alertStore = useAlertStore();
+    const transactioModal = ref(props.show);
     const outDate = ref("");
     const entryDate = ref("");
+    const loading = ref(false); // Tambahkan state loading untuk menghindari klik ganda
+
 
     const fields = [
       { key: "item_name", label: "Item Name" },
       { key: "quantity", label: "Quantity" },
     ];
+
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      return format(date, "yyyy-MM-dd", { locale: id });
+    };
+
+    watch(
+      () => props.selectedItem,
+      (newItem) => {
+        if (newItem) {
+          outDate.value = formatDate(newItem.out) || '';  // Setting out date based on selected item
+          entryDate.value = formatDate(newItem.entry) || '';  // Setting entry date based on selected item
+        }
+      },
+      { immediate: true }
+    );
 
     // Validation logic
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -78,7 +114,7 @@ export default {
     const draftItems = computed(() =>
       props.items.filter((item) => item.status === "draft")
     );
-    
+
     // Update modal visibility
     const isVisible = computed({
       get: () => props.show,
@@ -89,30 +125,33 @@ export default {
       emit("update:show", false);
     };
 
-    const onSubmit = async () => {
+    const handleAction = async () => {
+      loading.value = true;
+
+      const data = { out: outDate.value, entry: entryDate.value };
       try {
-        if (!outDateValid.value || !entryDateValid.value) {
-          alertStore.showAlert("Both Out Date and Entry Date must be valid!");
-          return;
+        if (props.mode === 'add') {
+          await addDetail(data);
+          emit('add-transaction', data);
+          alertStore.showAlert(data.message || 'Chart created successfully', false);
+        } else {
+          const response = await updateDetail(props.selectedItem.detail_id, data);
+          emit('update-transaction', data);
+          alertStore.showAlert(response.message || 'Chart updated successfully', false);
         }
-
-        const loanData = {
-          out: outDate.value,
-          entry: entryDate.value,
-        };
-
-        await addDetail(loanData);
-        alertStore.showAlert(loanData.message || 'Loan transaction submitted successfully!', false);
-        emit("update-chart");
-        closeModal();
+        isVisible.value = false;
       } catch (error) {
         console.error('Error:', error);
         alertStore.showAlert(
-          error.response?.data?.errors.join(", ") || "Failed to submit loan transaction. Please try again.",
+          error.response?.data?.errors.join(", ") || 'An unexpected error occurred',
           true
         );
+      } finally {
+        loading.value = false;
       }
     };
+
+    const actionLabel = computed(() => (props.mode === 'add' ? 'Add Transaction' : 'Update Transaction'));
 
     return {
       fields,
@@ -122,8 +161,14 @@ export default {
       entryDate,
       outDateValid,
       entryDateValid,
-      onSubmit,
+      handleAction,
       closeModal,
+      actionLabel,
+      transactioModal,
+      outDate,
+      entryDate,
+      formatDate,
+      loading,
     };
   },
 };
