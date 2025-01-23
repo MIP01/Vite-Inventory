@@ -13,20 +13,28 @@ const apiClient = axios.create({
 
 // Interceptor untuk menangani error token expired
 apiClient.interceptors.response.use(
-  (response) => response, // Jika respons berhasil, kembalikan langsung
-  (error) => {
+  (response) => response,
+  async (error) => {
     if (
       error.response &&
       error.response.data &&
       error.response.data.error === 'Token is expired'
     ) {
       console.warn('Token expired, clearing auth state and redirecting to login...');
-      const authStore = useAuthStore(); // Reset autentikasi
+      const authStore = useAuthStore();
+      const alertStore = useAlertStore();
+      
+      // Clear auth state
       authStore.signOut();
-      localStorage.removeItem('token'); // Hapus token
-      router.push('/login'); // Arahkan ke halaman login
+      localStorage.removeItem('token');
+      
+      // Tampilkan pesan ke user
+      alertStore.showAlert('Sesi Anda telah berakhir. Silakan login kembali.', true);
+      
+      // Redirect ke halaman login dengan router
+      window.location.href = '/login';
     }
-    return Promise.reject(error); // Lempar error agar bisa ditangani lebih lanjut
+    return Promise.reject(error);
   }
 );
 
@@ -68,6 +76,32 @@ export const getUserById = async (id) => {
     return response.data; // Mengembalikan data pengguna
   } catch (error) {
     console.error(`Error fetching user with ID ${id}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const updateUser = async (id, data) => {
+  const authStore = useAuthStore();
+  const alertStore = useAlertStore();
+  
+  const token = localStorage.getItem('token') || authStore.user.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.put(`/user/${id}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+      },
+    });
+    console.log('Fetched user:', response.data);
+    return response.data; // Mengembalikan data pengguna
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    console.error('Error add detail:', error.response?.data || error.message);
+    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
     throw error;
   }
 };

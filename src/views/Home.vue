@@ -1,12 +1,12 @@
 <template>
     <div class="home-container">
         <h1 class="text-left mb-4"><span class="icon me-2"><i class="mdi mdi-book-multiple"></i></span>Inventory List</h1>
-        <b-container>
-            <b-row>
-                <b-col v-for="item in items" :key="item.item_id" cols="12" md="4">
+        <b-container class="px-4">
+            <b-row class="mx-n3">
+                <b-col v-for="item in items" :key="item.item_id" cols="12" sm="6" md="4" lg="3" class="px-3 mb-4">
                     <b-card :title="item.name" img-src="https://picsum.photos/600/300/?image=25" img-alt="Item Image"
                         :footer="'Updated At: ' + formatDate(item.updated_at)" img-top tag="article"
-                        style="max-width: 20rem; cursor: pointer;" class="m-4" @click="openModal(item.item_id)">
+                        class="h-100" @click="openModal(item.item_id)">
                         <b-card-text>
                             Stock: {{ item.stock }}<br />
                         </b-card-text>
@@ -80,12 +80,32 @@ export default {
 <style scoped>
 .home-container {
     margin: 0 auto;
-    padding: 30px;
+    padding: 15px;
     border-radius: 8px;
+}
+
+.container {
+    max-width: 1400px !important;
+    margin: 0 auto;
 }
 
 .error {
     color: red;
     margin-top: 10px;
+}
+
+.card {
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
 }
 </style>

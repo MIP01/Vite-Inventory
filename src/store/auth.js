@@ -35,7 +35,11 @@ export const useAuthStore = defineStore('auth', {
         signOut() {
             this.isAuthenticated = false;
             this.user = null;
-            localStorage.removeItem('token'); // Hapus token dari localStorage
+            localStorage.removeItem('token');
+            
+            // Bersihkan state lain yang mungkin bergantung pada autentikasi
+            // Misalnya cache data user, dll
+            localStorage.removeItem('redirectRoute');
         },
 
         loadToken() {

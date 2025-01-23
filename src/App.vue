@@ -17,14 +17,31 @@
 </template>
 
 <script setup>
+import { watch } from 'vue';
+import { useRouter } from 'vue-router';
 import Nav from './components/Nav.vue';
 import AlertModal from './components/AlertModal.vue';
 import { useAuthStore } from './store/auth';
 import { useAlertStore } from './store/alert';
 
+const router = useRouter();
 const alertStore = useAlertStore();
 const authStore = useAuthStore();
+
+// Load token saat aplikasi dimulai
 authStore.loadToken();
+
+// Watch perubahan status autentikasi
+watch(() => authStore.isAuthenticated, (newValue) => {
+  if (!newValue && router.currentRoute.value.meta.requiresAuth) {
+    // Simpan path terakhir sebelum redirect ke login
+    const currentPath = router.currentRoute.value.path;
+    if (currentPath !== '/login') {
+      localStorage.setItem('lastActivePath', currentPath);
+    }
+    router.push('/login');
+  }
+}, { immediate: true });
 </script>
 
 <style scoped>

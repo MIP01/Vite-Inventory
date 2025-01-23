@@ -24,14 +24,18 @@ const router = createRouter({
 // Tambahkan navigation guard
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-
+  
+  // Cek apakah rute memerlukan autentikasi
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    // Jika tidak autentikasi, simpan rute terakhir dan arahkan ke login
-    localStorage.setItem('redirectRoute', to.fullPath);
-    return next({ path: '/login' });
+    // Simpan rute terakhir jika bukan /login
+    const lastPath = localStorage.getItem('lastActivePath');
+    if (lastPath && lastPath !== '/login') {
+      localStorage.setItem('redirectRoute', lastPath);
+    }
+    return next('/login');
   }
-
-  next(); // Lanjutkan ke rute tujuan
+  
+  next();
 });
 
 // Mengarahkan kembali setelah login berhasil (akan dilakukan di komponen Vue)

@@ -51,8 +51,21 @@ export default {
         };
     },
     mounted() {
-        // Sinkronkan activeTab dengan rute saat ini
-        this.setActiveTabByRoute(this.$route.path);
+        // Ambil tab terakhir dari localStorage
+        const lastActiveTab = localStorage.getItem('lastActiveTab');
+        const lastActivePath = localStorage.getItem('lastActivePath');
+        
+        if (lastActiveTab && lastActivePath) {
+            // Jika ada data tersimpan, gunakan itu
+            this.activeTab = parseInt(lastActiveTab);
+            // Arahkan ke path terakhir
+            if (this.$route.path !== lastActivePath) {
+                this.$router.push(lastActivePath);
+            }
+        } else {
+            // Jika tidak ada data tersimpan, gunakan rute saat ini
+            this.setActiveTabByRoute(this.$route.path);
+        }
     },
     watch: {
         // Sinkronkan activeTab saat rute berubah
@@ -62,15 +75,33 @@ export default {
     },
     methods: {
         setActiveTab(index) {
-            // Mengatur tab aktif
             this.activeTab = index;
-            // Simpan tab yang terakhir diakses ke localStorage
-            localStorage.setItem('lastActiveTab', index);
+            // Simpan state ke localStorage
+            localStorage.setItem('lastActiveTab', index.toString());
+            localStorage.setItem('lastActivePath', this.tabs[index].route);
         },
         setActiveTabByRoute(route) {
-            // Tentukan tab aktif berdasarkan rute saat ini
             const index = this.tabs.findIndex((tab) => tab.route === route);
-            this.activeTab = index !== -1 ? index : 0; // Default ke tab pertama jika rute tidak ditemukan
+            if (index !== -1) {
+                this.activeTab = index;
+                localStorage.setItem('lastActiveTab', index.toString());
+                localStorage.setItem('lastActivePath', route);
+            } else {
+                // Jika rute tidak ditemukan dalam tabs, coba ambil dari localStorage
+                const lastActiveTab = localStorage.getItem('lastActiveTab');
+                const lastActivePath = localStorage.getItem('lastActivePath');
+                
+                if (lastActiveTab && lastActivePath) {
+                    this.activeTab = parseInt(lastActiveTab);
+                    if (this.$route.path !== lastActivePath) {
+                        this.$router.push(lastActivePath);
+                    }
+                } else {
+                    // Jika tidak ada data tersimpan, set ke tab pertama
+                    this.activeTab = 0;
+                    this.$router.push(this.tabs[0].route);
+                }
+            }
         },
         goToLogin() {
             // Arahkan pengguna ke halaman login
