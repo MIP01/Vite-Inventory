@@ -2,7 +2,7 @@
   <div class="card">
     <header class="card-header">
       <p class="card-header-title">
-        <span class="icon"><i class="mdi mdi-account-multiple"></i></span>
+        <span class="icon"><i class="mdi mdi-file-check"></i></span>
         Transaction List
       </p>
       <b-button class="card-header-icon" @click="fetchDetail" variant="primary">
@@ -36,7 +36,7 @@
         </template>
       </b-table>
     </div>
-    <TransactionModal :items="detailData" :show="loanModalVisible" :selectedItem="selectedItem" :mode="'update'" @update:show="loanModalVisible = $event" 
+    <TransactionModal :items="detailData" :show="loanModalVisible" :selectedItem="selectedItem" :mode="'update'" :selectedCode="selectedItem.code" @update:show="loanModalVisible = $event" 
             @update-data="fetchDetail"/>
   </div>
 </template>
@@ -165,6 +165,14 @@ export default {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.card-header-title {
+    display: flex;
+    align-items: center;
+    font-size: 27px;
+    font-weight: bold;
+    gap: 8px;
 }
 
 .actions-cell {

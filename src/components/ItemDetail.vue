@@ -1,5 +1,9 @@
 <template>
-    <b-modal v-model="showModal" title="Information">
+    <b-modal v-model="showModal">
+        <!-- Slot untuk custom title -->
+        <template #title>
+            <i class="mdi mdi-information-outline"></i> Information
+        </template>
         <div class="item-image">
             <img :src="modalItem.imageUrl || 'https://picsum.photos/600/300/?image=25'"
                 :alt="modalItem.name || 'Item Image'" class="img-fluid" />
@@ -114,7 +118,7 @@ export default {
             } catch (error) {
                 console.error('Error:', error);
                 alertStore.showAlert(
-                    error.response?.data?.error || error.message ||'An unexpected error occurred',
+                    error.response?.data?.error || error.message || 'An unexpected error occurred',
                     true
                 );
             } finally {

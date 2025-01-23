@@ -1,8 +1,12 @@
 <template>
-  <b-modal v-model="isVisible" title="Loan Items">
+  <b-modal v-model="isVisible">
+    <!-- Slot untuk custom title -->
+    <template #title>
+            <i class="mdi mdi-information-outline"></i> Information
+        </template>
     <div>
       <h5>Items to Loan</h5>
-      <b-table :items="draftItems" :fields="fields" small bordered responsive>
+      <b-table :items="filteredItems" :fields="fields" small bordered responsive>
         <template #cell(quantity)="data">
           <span>{{ data.item.quantity }}</span>
         </template>
@@ -47,7 +51,7 @@
 
 <script>
 import { ref, computed, watch } from "vue";
-import { addDetail,updateDetail } from "../api";
+import { addDetail, updateDetail } from "../api";
 import { useAlertStore } from '../store/alert';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
@@ -66,6 +70,11 @@ export default {
     selectedItem: {
       type: Object,
       required: false,  // This will be passed from the parent component
+    },
+    selectedCode: { // Tambahkan properti ini
+      type: String,
+      required: false,
+      default: null,
     },
     mode: {
       type: String,
@@ -115,6 +124,15 @@ export default {
       props.items.filter((item) => item.status === "draft")
     );
 
+    // Filter items with same code
+    const codeItems = computed(() =>
+      props.items.filter((item) => item.code === props.selectedCode)
+    );
+
+    const filteredItems = computed(() => {
+      return props.mode === "add" ? draftItems.value : codeItems.value;
+    });
+
     // Update modal visibility
     const isVisible = computed({
       get: () => props.show,
@@ -155,7 +173,7 @@ export default {
 
     return {
       fields,
-      draftItems,
+      filteredItems,
       isVisible,
       outDate,
       entryDate,

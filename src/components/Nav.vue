@@ -1,15 +1,12 @@
 <template>
     <BCard title="Card Title" no-body>
-        <BCardHeader header-tag="nav" bg-variant="secondary">
+        <BCardHeader header-tag="nav" class="home-header">
             <BNav card-header tabs class="d-flex justify-content-between">
                 <!-- Tab Items lainnya di kiri -->
-                <BNavItem v-for="(tab, index) in tabs.slice(0, tabs.length - 1)" :key="index" :active="activeTab === index">
-                    <router-link
-                        :to="tab.route"
-                        @click="setActiveTab(index)"
-                        class="no-underline"
-                        :class="{ 'text-light': activeTab !== index, 'text-primary': activeTab === index }"
-                    >
+                <BNavItem v-for="(tab, index) in tabs.slice(0, tabs.length - 1)" :key="index"
+                    :active="activeTab === index">
+                    <router-link :to="tab.route" @click="setActiveTab(index)" class="no-underline"
+                        :class="{ 'text-light': activeTab !== index, 'text-primary': activeTab === index }">
                         {{ tab.label }}
                     </router-link>
                 </BNavItem>
@@ -18,12 +15,9 @@
                 <div class="ml-auto">
                     <!-- Profile Tab -->
                     <BNavItem :active="activeTab === tabs.length - 1">
-                        <router-link
-                            :to="tabs[tabs.length - 1].route"
-                            @click="setActiveTab(tabs.length - 1)"
+                        <router-link :to="tabs[tabs.length - 1].route" @click="setActiveTab(tabs.length - 1)"
                             class="no-underline"
-                            :class="{ 'text-light': activeTab !== tabs.length - 1, 'text-primary': activeTab === tabs.length - 1 }"
-                        >
+                            :class="{ 'text-light': activeTab !== tabs.length - 1, 'text-primary': activeTab === tabs.length - 1 }">
                             {{ tabs[tabs.length - 1].label }}
                         </router-link>
                     </BNavItem>
@@ -57,12 +51,14 @@ export default {
         };
     },
     mounted() {
-        // Cek jika ada tab yang terakhir diakses yang disimpan di localStorage
-        const lastActiveTab = localStorage.getItem('lastActiveTab');
-        if (lastActiveTab !== null) {
-            // Set activeTab berdasarkan tab yang terakhir diakses
-            this.activeTab = parseInt(lastActiveTab, 10);
-        }
+        // Sinkronkan activeTab dengan rute saat ini
+        this.setActiveTabByRoute(this.$route.path);
+    },
+    watch: {
+        // Sinkronkan activeTab saat rute berubah
+        '$route.path'(newRoute) {
+            this.setActiveTabByRoute(newRoute);
+        },
     },
     methods: {
         setActiveTab(index) {
@@ -70,6 +66,11 @@ export default {
             this.activeTab = index;
             // Simpan tab yang terakhir diakses ke localStorage
             localStorage.setItem('lastActiveTab', index);
+        },
+        setActiveTabByRoute(route) {
+            // Tentukan tab aktif berdasarkan rute saat ini
+            const index = this.tabs.findIndex((tab) => tab.route === route);
+            this.activeTab = index !== -1 ? index : 0; // Default ke tab pertama jika rute tidak ditemukan
         },
         goToLogin() {
             // Arahkan pengguna ke halaman login
@@ -80,6 +81,10 @@ export default {
 </script>
 
 <style scoped>
+.home-header {
+  background-color: #7a86b1; /* Ganti dengan warna kustom Anda */
+}
+
 /* Menghilangkan underline pada router-link */
 .no-underline {
     text-decoration: none;
@@ -104,6 +109,7 @@ export default {
 }
 
 .text-primary {
-    color: #007bff; /* Warna biru untuk tab aktif */
+    color: #007bff;
+    /* Warna biru untuk tab aktif */
 }
 </style>

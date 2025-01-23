@@ -1,6 +1,5 @@
 <template>
-    <div class="signup container mt-5">
-        <b-card title="Sign Up" class="w-50 mx-auto">
+    <div class="signup-container">
             <b-form @submit.prevent="onSubmit">
                 <b-form-group label="Name" label-for="name">
                     <b-form-input id="name" v-model="name" type="text" placeholder="Enter your name"
@@ -17,9 +16,8 @@
                         required></b-form-input>
                 </b-form-group>
 
-                <b-button type="submit" variant="primary" class="signup w-100">Sign Up</b-button>
+                <b-button type="submit" variant="primary" class="mt-3 w-100">Sign Up</b-button>
             </b-form>
-        </b-card>
     </div>
 </template>
 
@@ -67,7 +65,12 @@ export default {
 </script>
 
 <style scoped>
-.signup {
-    margin-top: 30px;
+.signup-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #f9f9f9;
 }
 </style>

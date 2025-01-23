@@ -1,12 +1,12 @@
 <template>
     <div class="home-container">
-        <h1 class="text-left mb-4">Inventory List</h1>
+        <h1 class="text-left mb-4"><span class="icon me-2"><i class="mdi mdi-book-multiple"></i></span>Inventory List</h1>
         <b-container>
             <b-row>
                 <b-col v-for="item in items" :key="item.item_id" cols="12" md="4">
                     <b-card :title="item.name" img-src="https://picsum.photos/600/300/?image=25" img-alt="Item Image"
                         :footer="'Updated At: ' + formatDate(item.updated_at)" img-top tag="article"
-                        style="max-width: 20rem; cursor: pointer;" @click="openModal(item.item_id)">
+                        style="max-width: 20rem; cursor: pointer;" class="m-4" @click="openModal(item.item_id)">
                         <b-card-text>
                             Stock: {{ item.stock }}<br />
                         </b-card-text>
@@ -79,7 +79,6 @@ export default {
 
 <style scoped>
 .home-container {
-    
     margin: 0 auto;
     padding: 30px;
     border-radius: 8px;
