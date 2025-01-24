@@ -57,11 +57,7 @@ export default {
         
         if (lastActiveTab && lastActivePath) {
             // Jika ada data tersimpan, gunakan itu
-            this.activeTab = parseInt(lastActiveTab);
-            // Arahkan ke path terakhir
-            if (this.$route.path !== lastActivePath) {
-                this.$router.push(lastActivePath);
-            }
+            this.activeTab = parseInt(lastActiveTab);           
         } else {
             // Jika tidak ada data tersimpan, gunakan rute saat ini
             this.setActiveTabByRoute(this.$route.path);
@@ -82,25 +78,15 @@ export default {
         },
         setActiveTabByRoute(route) {
             const index = this.tabs.findIndex((tab) => tab.route === route);
+            
             if (index !== -1) {
+                // Jika rute ditemukan dalam tabs, sinkronkan tab aktif
                 this.activeTab = index;
                 localStorage.setItem('lastActiveTab', index.toString());
                 localStorage.setItem('lastActivePath', route);
-            } else {
-                // Jika rute tidak ditemukan dalam tabs, coba ambil dari localStorage
-                const lastActiveTab = localStorage.getItem('lastActiveTab');
-                const lastActivePath = localStorage.getItem('lastActivePath');
-                
-                if (lastActiveTab && lastActivePath) {
-                    this.activeTab = parseInt(lastActiveTab);
-                    if (this.$route.path !== lastActivePath) {
-                        this.$router.push(lastActivePath);
-                    }
-                } else {
-                    // Jika tidak ada data tersimpan, set ke tab pertama
-                    this.activeTab = 0;
-                    this.$router.push(this.tabs[0].route);
-                }
+            } else if (route !== '/signup') {
+                // Jika rute tidak ditemukan dalam tabs dan bukan /signup, biarkan rute berjalan tanpa mengubah tab
+                console.log("Rute tidak ditemukan di tabs, tidak ada perubahan tab:", route);
             }
         },
         goToLogin() {
