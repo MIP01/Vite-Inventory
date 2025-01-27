@@ -37,7 +37,7 @@
       </b-table>
     </div>
     <TransactionModal :items="detailData" :show="loanModalVisible" :selectedItem="selectedItem" :mode="'update'" :selectedCode="selectedItem.code" @update:show="loanModalVisible = $event" 
-            @update-data="fetchDetail"/>
+            @update-transaction="fetchDetail"/>
   </div>
 </template>
 
