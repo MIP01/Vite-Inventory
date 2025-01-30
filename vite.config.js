@@ -11,4 +11,8 @@ export default defineConfig({
       resolvers: [BootstrapVueNextResolver()],
     }),
   ],
+  server: {
+    host: '0.0.0.0',
+    port: 80,
+  }
 })

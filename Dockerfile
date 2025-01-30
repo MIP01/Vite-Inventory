@@ -1,5 +1,5 @@
 # Menggunakan image Node.js sebagai base image
-FROM node:22.13.0 AS build
+FROM node:22.13.0-alpine AS build
 
 # Set working directory
 WORKDIR /app
@@ -16,11 +16,19 @@ COPY . /app
 # Membangun aplikasi untuk produksi
 RUN yarn build
 
-# Menggunakan Nginx untuk menyajikan aplikasi
-FROM nginx:alpine
+# Production stage menggunakan Node.js dan serve
+FROM node:22.13.0-alpine
 
-# Menyalin hasil build ke direktori Nginx
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-# Menyalakan Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Install serve
+RUN yarn global add serve
+
+# Copy build files dari build stage
+COPY --from=build /app/dist ./dist
+
+# Expose port
+EXPOSE 3001
+
+# Jalankan serve dengan port
+CMD ["serve", "-s", "dist", "-l", "80"]

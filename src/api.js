@@ -155,6 +155,7 @@ export const getItemById = async (id) => {
 
 export const getChart = async () => {
   const authStore = useAuthStore();
+  const alertStore = useAlertStore();
 
   // Ambil token dari localStorage atau store auth
   const token = localStorage.getItem('token') || authStore?.user?.token;
@@ -171,7 +172,9 @@ export const getChart = async () => {
     });
     return response.data.transaction;
   } catch (error) {
-    console.error('Error fetching chart:', error.response?.data || error.message);
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    console.error('Error get chart:', error.response?.data || error.message);
+    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
     throw error;
   }
 };
@@ -273,7 +276,7 @@ export const getDetail = async () => {
     return response.data.detail;
   } catch (error) {
     const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
-    console.error('Error add detail:', error.response?.data || error.message);
+    console.error('Error get detail:', error.response?.data || error.message);
     alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
     throw error;
   }
