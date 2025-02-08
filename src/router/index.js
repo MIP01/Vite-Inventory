@@ -5,7 +5,13 @@ import Login from '../views/Login.vue';
 import Profile from '../views/Profile.vue';
 import Transaction from '../views/Transaction.vue';
 import Signup from '../views/Signup.vue';
+import Dashboard from '../views/Dashboard.vue';
+import Users from '../views/Users.vue';
+import UserTransaction from '../views/UserTransaction.vue';
 import { useAuthStore } from '../store/auth';
+
+
+
 
 const routes = [
   { path: '/', name: 'Home', component: Home, meta: { requiresAuth: false } },
@@ -14,7 +20,11 @@ const routes = [
   { path: '/signup', name: 'Signup', component: Signup, meta: { requiresAuth: false } },
   { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
   { path: '/transaction', name: 'Transaction', component: Transaction, meta: { requiresAuth: true } },
+  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/users', name: 'Users', component: Users, meta: { requiresAuth: true, requiresAdmin: true } },
+  { path: '/user-transaction', name: 'UserTransaction', component: UserTransaction, meta: { requiresAuth: true } },
 ];
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

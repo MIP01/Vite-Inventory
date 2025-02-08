@@ -5,7 +5,9 @@ import router from './router';
 
 // Konfigurasi dasar Axios
 const apiClient = axios.create({
+  // for local 
   baseURL: 'http://localhost:8080/api/v1',
+  // baseURL: '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -29,7 +31,7 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('token');
       
       // Tampilkan pesan ke user
-      alertStore.showAlert('Sesi Anda telah berakhir. Silakan login kembali.', true);
+      alertStore.showAlert('Your session has ended. Please login again.', true);
       
       // Redirect ke halaman login dengan router
       window.location.href = '/login';
@@ -41,6 +43,57 @@ apiClient.interceptors.response.use(
 export default apiClient;
 
 // Fungsi akses endpoint API
+export const getUser = async () => {
+  const authStore = useAuthStore();
+
+  // Ambil token dari localStorage atau store auth
+  const token = localStorage.getItem('token') || authStore?.user?.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.get(`/user`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error get chart:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const deleteUser = async (userId) => {
+  const authStore = useAuthStore();
+  const alertStore = useAlertStore();
+  // Ambil token dari localStorage atau store auth
+  const token = localStorage.getItem('token') || authStore?.user?.token;
+
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.delete(`/user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+
+      },
+    });
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    console.error('Error delete user:', error.response?.data || error.message);
+    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
+    throw error;
+  }
+
+};
+
 export const createUser = async (userData) => {
   const alertStore = useAlertStore();
 
@@ -155,7 +208,6 @@ export const getItemById = async (id) => {
 
 export const getChart = async () => {
   const authStore = useAuthStore();
-  const alertStore = useAlertStore();
 
   // Ambil token dari localStorage atau store auth
   const token = localStorage.getItem('token') || authStore?.user?.token;
@@ -172,9 +224,7 @@ export const getChart = async () => {
     });
     return response.data.transaction;
   } catch (error) {
-    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
     console.error('Error get chart:', error.response?.data || error.message);
-    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
     throw error;
   }
 };
@@ -258,7 +308,6 @@ export const deleteChart = async (transactionId) => {
 
 export const getDetail = async () => {
   const authStore = useAuthStore();
-  const alertStore = useAlertStore();
 
   // Ambil token dari localStorage atau store auth
   const token = localStorage.getItem('token') || authStore?.user?.token;
@@ -275,9 +324,7 @@ export const getDetail = async () => {
     });
     return response.data.detail;
   } catch (error) {
-    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
     console.error('Error get detail:', error.response?.data || error.message);
-    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
     throw error;
   }
 };
@@ -357,5 +404,158 @@ export const addDetail = async (data) => {
     console.error('Error add detail:', error.response?.data || error.message);
     alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
     throw error;
+  }
+};
+
+//admin role
+export const getAdmin = async (id) => {
+  const authStore = useAuthStore();
+
+  // Ambil token dari localStorage atau store auth
+  const token = localStorage.getItem('token') || authStore.user.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.get(`/admin/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+      },
+    });
+    console.log('Fetched admin:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching admin with ID ${id}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+export const updateAdmin = async (id, data) => {
+  const authStore = useAuthStore();
+  const alertStore = useAlertStore();
+  
+
+  const token = localStorage.getItem('token') || authStore.user.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.put(`/admin/${id}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+      },
+
+    });
+    console.log('Fetched admin:', response.data);
+    return response.data; // Mengembalikan data pengguna
+
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    console.error('Error update admin:', error.response?.data || error.message);
+    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
+    throw error;
+
+  }
+};
+
+export const addItem = async (data) => {
+  const authStore = useAuthStore();
+  const alertStore = useAlertStore();
+
+  const token = localStorage.getItem('token') || authStore?.user?.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    console.log('Mengirim data item:', data);
+    console.log('Token yang digunakan:', token);
+    
+    const response = await apiClient.post(`/item`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+    });
+    
+    console.log('Response dari server:', response.data);
+    return response.data;
+  } catch (error) {
+    console.log('Error lengkap:', error);
+    console.log('Response error:', error.response);
+    
+    if (error.response?.data) {
+      console.log('Server error message:', error.response.data);
+    }
+    
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    alertStore.showAlert(errorMessage, true);
+    throw error;
+  }
+};
+
+export const updateItemById = async (itemId, data) => {
+  const authStore = useAuthStore();
+  const alertStore = useAlertStore();
+
+  const token = localStorage.getItem('token') || authStore?.user?.token;
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    console.log('Update item ID:', itemId);
+    console.log('Data update:', data);
+    console.log('Token yang digunakan:', token);
+    
+    const response = await apiClient.put(`/item/${itemId}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    console.log('Response dari server:', response.data);
+    return response.data.item;
+  } catch (error) {
+    console.log('Error lengkap:', error);
+    console.log('Response error:', error.response);
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    alertStore.showAlert(errorMessage, true);
+    throw error;
+  }
+};
+
+export const deleteItem = async (itemId) => {
+  const authStore = useAuthStore();
+  const alertStore = useAlertStore();
+  // Ambil token dari localStorage atau store auth
+  const token = localStorage.getItem('token') || authStore?.user?.token;
+
+
+  if (!token) {
+    throw new Error('No token available. Please log in first.');
+  }
+
+  try {
+    const response = await apiClient.delete(`/item/${itemId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Menyertakan token dalam header Authorization
+      },
+
+    });
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || 'An unexpected error occurred';
+    console.error('Error delete item:', error.response?.data || error.message);
+    alertStore.showAlert(errorMessage, true); // Tampilkan pesan error
+    throw error;
+
   }
 };

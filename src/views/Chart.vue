@@ -15,7 +15,7 @@
             </div>
         </header>
         <div class="card-content">
-            <b-table :items="chartData" :fields="fields" bordered hover striped responsive class="is-fullwidth">
+            <b-table :items="chartData" :fields="fields" bordered hover striped responsive class="is-fullwidth"  show-empty>
                 <template #cell(actions)="data">
                     <div class="actions-cell">
                         <b-button size="sm" variant="primary" @click="openModal(data.item.transaction_id)">
@@ -68,10 +68,10 @@ export default {
         const fetchChart = async () => {
             try {
                 const data = await getChart();
-                chartData.value = [...data];
-                console.log('Chart data fetched:', data);
+                chartData.value = data || [];
             } catch (error) {
                 console.error('Error fetching chart:', error);
+                chartData.value = [];
             }
         };
 
@@ -87,6 +87,7 @@ export default {
 
                     // Check if response is valid and contains success
                     if (response && response.message) {
+                        chartData.value = chartData.value.filter(item => item.transaction_id !== transactionId);
                         alertStore.showAlert(response.message || 'Transaction deleted successfully', false);
 
                         await fetchChart();  // Fetch fresh data from the server

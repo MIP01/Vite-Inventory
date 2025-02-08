@@ -77,7 +77,7 @@
 <script>
 import { useAuthStore } from '../store/auth';
 import { useAlertStore } from '../store/alert';
-import { getUserById, updateUser } from '../api';
+import { getUserById, updateUser, getAdmin, updateAdmin } from '../api';
 
 export default {
     name: 'Profile',
@@ -109,9 +109,19 @@ export default {
                     throw new Error('User role not found in store');
                 }
 
-                // Panggil API untuk mendapatkan data user berdasarkan user_id
-                const response = await getUserById(authStore.user.user_id);
-                this.user = response; // Simpan data user yang diterima dari API
+                if (authStore.user.role === 'admin') {
+                    const response = await getAdmin(authStore.user.user_id);
+                    this.user = {
+                        name: response.name,
+                        email: response.email,
+                        user_id: response.admin_id,
+                        created_at: response.created_at,
+                        updated_at: response.updated_at
+                    };
+                } else {
+                    const response = await getUserById(authStore.user.user_id);
+                    this.user = response;
+                }
             } catch (error) {
                 const alertStore = useAlertStore();
                 // Penanganan error, termasuk redirect jika token kedaluwarsa
@@ -130,17 +140,22 @@ export default {
         signOut() {
             const authStore = useAuthStore();
             const alertStore = useAlertStore();
-            authStore.signOut(); // Clear authentication state
+            authStore.signOut();
             alertStore.showAlert('You have been logged out successfully', false);
-            this.$router.push('/login'); // Redirect to login
+            this.$router.push('/login');
         },
         async updateProfile() {
             try {
                 const authStore = useAuthStore();
                 const alertStore = useAlertStore();
-                const response = await updateUser(authStore.user.user_id, this.formData);
                 
-                // Update data user lokal dengan data terbaru
+                let response;
+                if (authStore.user.role === 'admin') {
+                    response = await updateAdmin(authStore.user.user_id, this.formData);
+                } else {
+                    response = await updateUser(authStore.user.user_id, this.formData);
+                }
+                
                 this.user = {
                     ...this.user,
                     name: this.formData.name || this.user.name,

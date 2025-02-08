@@ -37,18 +37,26 @@
 </template>
 
 <script>
+import { useAuthStore } from '../store/auth';
+import { storeToRefs } from 'pinia';
+
 export default {
     name: 'Nav',
+    setup() {
+        const authStore = useAuthStore();
+        const { user } = storeToRefs(authStore);
+        return { authStore, user };
+    },
     data() {
         return {
-            activeTab: 0, // Tab aktif (default adalah tab pertama)
-            tabs: [
-                { label: "Items", route: '/', content: "Daftar items akan ditampilkan di sini." },
-                { label: "Chart", route: '/chart', content: "Halaman About." },
-                { label: "Transaction", route: '/transaction', content: "Halaman Contact." },
-                { label: "Profile", route: '/profile', content: "Halaman Profile." },
-            ],
+            activeTab: 0,
+            tabs: [],
+            isAdmin: false
         };
+    },
+    created() {
+        this.setTabsBasedOnRole(this.user?.role);
+        console.log('Nav component created, user role:', this.user?.role);
     },
     mounted() {
         // Ambil tab terakhir dari localStorage
@@ -64,12 +72,39 @@ export default {
         }
     },
     watch: {
-        // Sinkronkan activeTab saat rute berubah
         '$route.path'(newRoute) {
             this.setActiveTabByRoute(newRoute);
         },
+        'user': {
+            handler(newUser) {
+                this.setTabsBasedOnRole(newUser?.role);
+                console.log('User changed, updating tabs with role:', newUser?.role);
+            },
+            deep: true
+        }
     },
     methods: {
+        setTabsBasedOnRole(role) {
+            this.isAdmin = role === 'admin';
+            if (this.isAdmin) {
+                this.tabs = [
+                    { label: "Dashboard", route: '/dashboard', content: "Panel admin untuk mengelola items." },
+                    { label: "Transaction", route: '/user-transaction', content: "Halaman User Transaction." },
+                    { label: "Users", route: '/users', content: "Halaman Users." },
+                    { label: "Profile", route: '/profile', content: "Halaman Profile." },
+
+                ];
+                console.log('Admin tabs set');
+            } else {
+                this.tabs = [
+                    { label: "Items", route: '/', content: "Daftar items akan ditampilkan di sini." },
+                    { label: "Chart", route: '/chart', content: "Halaman Chart." },
+                    { label: "Transaction", route: '/transaction', content: "Halaman Transaction." },
+                    { label: "Profile", route: '/profile', content: "Halaman Profile." },
+                ];
+                console.log('Regular user tabs set');
+            }
+        },
         setActiveTab(index) {
             this.activeTab = index;
             // Simpan state ke localStorage
@@ -117,6 +152,7 @@ export default {
 }
 
 .card {
+    --bs-card-inner-border-radius: 0 !important;
     --bs-card-border-width: 0 !important;
     border-width: 0 !important;
 }

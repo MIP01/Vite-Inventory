@@ -4,11 +4,11 @@ FROM node:22.13.0-alpine AS build
 # Set working directory
 WORKDIR /app
 
-# Menyalin package.json dan yarn.lock
+# Salin package.json dan yarn.lock
 COPY package.json yarn.lock ./
 
-# Menginstal dependencies menggunakan Yarn
-RUN yarn install
+# Install semua dependencies (termasuk devDependencies)
+RUN yarn install --frozen-lockfile
 
 # Salin seluruh isi proyek ke dalam container
 COPY . /app
@@ -16,7 +16,7 @@ COPY . /app
 # Membangun aplikasi untuk produksi
 RUN yarn build
 
-# Production stage menggunakan Node.js dan serve
+# Production stage
 FROM node:22.13.0-alpine
 
 WORKDIR /app
@@ -24,11 +24,12 @@ WORKDIR /app
 # Install serve
 RUN yarn global add serve
 
-# Copy build files dari build stage
+# Salin build files dan dependencies yang diperlukan
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/package.json ./package.json
 
 # Expose port
 EXPOSE 3001
 
-# Jalankan serve dengan port
-CMD ["serve", "-s", "dist", "-l", "80"]
+# Jalankan serve dengan konfigurasi tambahan
+CMD ["serve", "-s", "dist", "-l", "3001", "--cors"]

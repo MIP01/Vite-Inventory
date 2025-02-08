@@ -47,10 +47,15 @@ export default {
                 // Simpan token di Pinia store
                 authStore.login(token); // Panggil authStore.login untuk memperbarui state
 
-                // Navigasi ke halaman tujuan setelah login
-                const redirectRoute = localStorage.getItem('redirectRoute') || '/';
-                localStorage.removeItem('redirectRoute');
-                router.push(redirectRoute);
+                // Cek role pengguna
+                if (authStore.user.role === 'admin') {
+                    router.push('/dashboard'); // Arahkan ke dashboard jika role admin
+                } else {
+                    // Navigasi ke halaman tujuan setelah login
+                    const redirectRoute = localStorage.getItem('redirectRoute') || '/';
+                    localStorage.removeItem('redirectRoute');
+                    router.push(redirectRoute);
+                }
 
                 alertStore.showAlert(response.message || 'Login successful!', false);
             } catch (error) {

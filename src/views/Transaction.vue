@@ -10,7 +10,7 @@
       </b-button>
     </header>
     <div class="card-content">
-      <b-table :items="groupedDetailData" :fields="fields" bordered hover striped responsive class="is-fullwidth">
+      <b-table :items="groupedDetailData" :fields="fields" bordered hover striped responsive class="is-fullwidth" show-empty>
         <template #cell(items)="data">
           <ul>
             <li v-for="item in data.item.items" :key="item.item_name">
@@ -72,9 +72,10 @@ export default {
   const fetchDetail = async () => {
     try {
       const data = await getDetail();
-      detailData.value = [...data];
+      detailData.value = data || [];
     } catch (error) {
       console.error('Error fetching chart:', error);
+      detailData.value = [];
     }
   };
 
@@ -95,9 +96,10 @@ export default {
         console.log('Delete response:', response); // Log response structure for debugging
 
         if (response && response.message) {
+          detailData.value = detailData.value.filter(item => item.detail_id !== detailId);
+          
           alertStore.showAlert(response.message || 'Transaction deleted successfully', false);
           await fetchDetail();
-
         } else {
           alertStore.showAlert(response?.message || 'An unexpected error occurred', true);
         }
@@ -119,6 +121,10 @@ export default {
   };
 
   const groupedDetailData = computed(() => {
+    if (!detailData.value || detailData.value.length === 0) {
+      return [];
+    }
+    
     const grouped = {};
     detailData.value.forEach((item) => {
       if (!grouped[item.detail_id]) {
